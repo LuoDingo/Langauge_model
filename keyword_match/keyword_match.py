@@ -7,17 +7,6 @@ from itertools import combinations
 import pandas as pd
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
-from io import StringIO
-import requests
-
-def takeKeywords():
-    keywords = input("Enter keywords separated by space: ")
-    return keywords.split(" ")
-
-def fetchCSVFromGit(url, index_col):
-    content=requests.get(url).content
-    df=pd.read_csv(StringIO(content.decode('utf-8')), header=None, index_col=index_col, names=['text'])
-    return df
 
 """
 ratio = compares the entire string in order
@@ -43,6 +32,10 @@ def fuzzyScore(query, candidate_sentences, limit, scoring_method='ratio'):
     return output
 
 def selectKBestMatches(keywords, target_space, max_candidate, k, scoring_method):
+
+    assert isinstance(target_space, pd.DataFrame), \
+            'target space must be a pandas dataframe'
+
     candidates = getCandidates(keywords=keywords, df=target_space, threshold=max_candidate)
     # Convert keywords into one string
     if isinstance(keywords, list):
