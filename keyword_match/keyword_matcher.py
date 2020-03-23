@@ -18,7 +18,7 @@ Default is ratio if you don't specify scoring method.
 * Reference: http://jonathansoma.com/lede/algorithms-2017/classes/fuzziness-matplotlib/fuzzing-matching-in-pandas-with-fuzzywuzzy/
 """
 
-def fuzzyScore(query, candidate_sentences, limit, scoring_method='ratio'):
+def _fuzzyScore(query, candidate_sentences, limit, scoring_method='ratio'):
     if scoring_method == 'ratio':
         output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.ratio)
     elif scoring_method == 'partial_ratio':
@@ -36,35 +36,35 @@ def selectKBestMatches(keywords, target_space, max_candidate, k, scoring_method)
     assert isinstance(target_space, pd.DataFrame), \
             'target space must be a pandas dataframe'
 
-    candidates = getCandidates(keywords=keywords, df=target_space, threshold=max_candidate)
+    candidates = _getCandidates(keywords=keywords, df=target_space, threshold=max_candidate)
     # Convert keywords into one string
     if isinstance(keywords, list):
         keywords = ' '.join(keywords)
-    suggestions = fuzzyScore(query=keywords, candidate_sentences=candidates['text'], scoring_method=scoring_method, limit=k)
+    suggestions = _fuzzyScore(query=keywords, candidate_sentences=candidates['text'], scoring_method=scoring_method, limit=k)
     return suggestions
 
-def getCandidates(keywords, df, threshold):
+def _getCandidates(keywords, df, threshold):
     size = len(keywords)
     # Store sentences that contain keywords
     df_return = pd.DataFrame([])
     # Repeat the process until df_return contains more examples than threshold
     # Or finish searching the sentence
     while (df_return.shape[0] <= threshold) and (size>0):
-        for query in getQueryCombinations(keywords, size):
+        for query in _getQueryCombinations(keywords, size):
             # Get all the sentences contains all words in a combination, but not exist in output candidates
             df_return = df[df['text'].str.contains(query) & ~df.index.isin(df_return.index)]
         size -= 1
 
     return df_return
 
-def getQueryCombinations(keywords, r):
+def _getQueryCombinations(keywords, r):
     queries = []
     # Generate all comibnations of size r in keywords
     for i in combinations(keywords, r):
-        queries.append(getQuery(i))
+        queries.append(_getQuery(i))
     return queries
 
-def getQuery(combinations):
+def _getQuery(combinations):
     query = ""
     # (?=.*word1)(?=.*word2) is equivalent to word1&word2 in regex
     for word in combinations:
