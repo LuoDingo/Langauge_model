@@ -7,42 +7,9 @@ from itertools import combinations
 import pandas as pd
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
+import utils
 
-"""
-ratio = compares the entire string in order
-partial_ration = compares subsections of the string
-toke_sort_ratio = ignores word order
-token_set_ratio = ignores duplicate words
-Default is ratio if you don't specify scoring method.
-
-* Reference: http://jonathansoma.com/lede/algorithms-2017/classes/fuzziness-matplotlib/fuzzing-matching-in-pandas-with-fuzzywuzzy/
-"""
-
-def _fuzzyScore(query, candidate_sentences, limit, scoring_method='ratio'):
-    if scoring_method == 'ratio':
-        output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.ratio)
-    elif scoring_method == 'partial_ratio':
-        output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.partial_ratio)
-    elif scoring_method == 'token_sort_ratio':
-        output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.token_sort_ratio)
-    elif scoring_method == 'token_set_ratio':
-        output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.token_set_ratio)
-    else:
-        output = []
-    return output
-
-def selectKBestMatches(keywords, target_space, max_candidate, k, scoring_method):
-
-    assert isinstance(target_space, pd.DataFrame), \
-            'target space must be a pandas dataframe'
-
-    candidates = _getCandidates(keywords=keywords, df=target_space, threshold=max_candidate)
-    # Convert keywords into one string
-    if isinstance(keywords, list):
-        keywords = ' '.join(keywords)
-    suggestions = _fuzzyScore(query=keywords, candidate_sentences=candidates['text'], scoring_method=scoring_method, limit=k)
-    return suggestions
-
+# Helper methods
 def _getCandidates(keywords, df, threshold):
     size = len(keywords)
     # Store sentences that contain keywords
@@ -70,3 +37,56 @@ def _getQuery(combinations):
     for word in combinations:
         query += '(?=.*' + word + ')'
     return query
+
+def _fuzzyScore(query, candidate_sentences, limit, scoring_method='ratio'):
+    """
+    ratio = compares the entire string in order
+    partial_ration = compares subsections of the string
+    toke_sort_ratio = ignores word order
+    token_set_ratio = ignores duplicate words
+    Default is ratio if you don't specify scoring method.
+
+    * Reference: http://jonathansoma.com/lede/algorithms-2017/classes/fuzziness-matplotlib/fuzzing-matching-in-pandas-with-fuzzywuzzy/
+    """
+    if scoring_method == 'ratio':
+        output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.ratio)
+    elif scoring_method == 'partial_ratio':
+        output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.partial_ratio)
+    elif scoring_method == 'token_sort_ratio':
+        output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.token_sort_ratio)
+    elif scoring_method == 'token_set_ratio':
+        output = process.extract(query, candidate_sentences, limit=limit, scorer=fuzz.token_set_ratio)
+    else:
+        output = []
+    return output
+
+class KeywordMatcher():
+    """
+    target space must be a dataframe with only one column that contains target sentences
+
+    (e.g.)
+    --------------
+    |    text    |
+    --------------
+    | sentence 1 |
+    | sentence 2 |
+    |    ....    |
+    | sentence N |
+    --------------
+    """
+
+    def __init__(self, url, col_index):
+        self.url = url
+        self.target_space = utils.fetch_csv_from_url(url, column_indices=col_index, column_names=['text'])
+
+    def selectKBestMatches(self, keywords, max_candidate, k, scoring_method):
+
+        candidates = _getCandidates(keywords=keywords, df=self.target_space, threshold=max_candidate)
+        # Convert keywords into one string
+        if isinstance(keywords, list):
+            keywords = ' '.join(keywords)
+        suggestions = _fuzzyScore(query=keywords, candidate_sentences=candidates['text'], scoring_method=scoring_method, limit=k)
+        return suggestions
+
+    def update_target_space(self, url, col_index):
+        self.target_space = utils.fetch_csv_from_url(url, column_indices=col_index, column_names=['text'])
