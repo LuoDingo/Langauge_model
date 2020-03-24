@@ -6,7 +6,7 @@ def takeKeywords():
     keywords = input("Enter keywords separated by space: ")
     return keywords.split(" ")
 
-def fetchCSVFromGit(url, index_col):
+def fetch_csv_from_git(url):
     content=requests.get(url).content
-    df=pd.read_csv(StringIO(content.decode('utf-8')), header=None, index_col=index_col, names=['text'])
+    df=pd.read_csv(StringIO(content.decode('utf-8')), header=None, names=['id', 'text'])
     return df
