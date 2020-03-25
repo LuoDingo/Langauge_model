@@ -1,0 +1,4 @@
+fuzzywuzzy==0.18.0
+pandas==0.24.2
+numpy==1.18.2
+nltk==3.4.5
