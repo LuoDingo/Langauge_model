@@ -3,20 +3,28 @@ import setuptools
 with open("README.md", "r") as f:
     long_description = f.read()
 
+__version__ = "1.1.0"
+
 setuptools.setup(
     name='sentence-suggestion',
-    version='0.1',
+    version=__version__,
     author='Kei Nemoto, Steven Alshheimer (equal contribution)',
     author_email='',
     description='A package that contains sentence suggestion models',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/LuoDingo/Langauge_model',
-    packages=setuptools.find_packages(),
+    packages=setuptools.find_packages(exclude=('data', 'test')),
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: MIT License",
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6',
+    install_requires=[
+        'fuzzywuzzy',
+        'pandas',
+        'numpy',
+        'nltk',
+    ],
+    python_requires='>=3.5',
 )
