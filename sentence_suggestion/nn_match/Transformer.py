@@ -1,14 +1,15 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 class Transformer(nn.Module):
 
     def __init__(self,
                  input_dim,
+                 output_dim,
                  hid_dim,
                  n_heads,
                  n_layers,
-                 pf_dim,
                  dropout_rate,
                  device,
                  pad_idx):
@@ -17,13 +18,16 @@ class Transformer(nn.Module):
         # specify the device (gpu or cpu)
         self.device = device
         # word embeddings
-        self.token_embedding = nn.Embedding(input_dim, hid_dim)
+        self.token_embedding = nn.Embedding(input_dim, hid_dim).to(device)
         # transformer layers
         self.layers = nn.ModuleList(
-                                    [TransformerLayer(hid_dim, n_heads, pf_dim, dropout_rate, device)
+                          [TransformerLayer(hid_dim, n_heads,
+                                            dropout_rate, device)
                                      for _ in range(n_layers)])
+        # Linear layer (this is where prediction happening)
+        self.fc = nn.Linear(hid_dim, output_dim).to(device)
 
-        self.dropout = nn.Dropout(dropout_rate)
+        self.dropout = nn.Dropout(dropout_rate).to(device)
 
         self.scale = torch.sqrt(torch.FloatTensor([hid_dim])).to(device)
 
@@ -53,22 +57,28 @@ class Transformer(nn.Module):
         # keywords = [batch size, keyword len, hid dim]
         keywords = self.dropout((self.token_embedding(keywords) * self.scale))
 
+        # iterate through all layers in encoder
         for layer in self.layers:
             # keywords = [batch size, keyword len, hid dim]
             keywords = layer(keywords, keywords_mask)
 
-        return keywords
+        # make predictions based on encoder output
+        outputs = self.fc(keywords)
+        # take the sume of transformer outputs
+        outputs = torch.tanh(torch.sum(outputs, dim=0))
+
+        return F.softmax(outputs, dim=1)
 
 class TransformerLayer(nn.Module):
 
-    def __init__(self, hid_dim, n_heads, pf_dim, dropout_rate, device):
+    def __init__(self, hid_dim, n_heads, dropout_rate, device):
 
         super().__init__()
 
-        self.layer_norm = nn.LayerNorm(hid_dim)
+        self.layer_norm = nn.LayerNorm(hid_dim).to(device)
         self.self_attention = MultiHeadAttentionLayer(hid_dim, n_heads, dropout_rate, device)
 
-        self.dropout = nn.Dropout(dropout_rate)
+        self.dropout = nn.Dropout(dropout_rate).to(device)
 
     def forward(self, keywords, keywords_mask):
         # keywords = [batch size, keywords len, hid_dim]
@@ -94,13 +104,13 @@ class MultiHeadAttentionLayer(nn.Module):
         # head_dim = 64 if hid_dim = 256 and n_heads = 4
         self.head_dim = hid_dim // n_heads
 
-        self.fc_q = nn.Linear(hid_dim, hid_dim)
-        self.fc_k = nn.Linear(hid_dim, hid_dim)
-        self.fc_v = nn.Linear(hid_dim, hid_dim)
+        self.fc_q = nn.Linear(hid_dim, hid_dim).to(device)
+        self.fc_k = nn.Linear(hid_dim, hid_dim).to(device)
+        self.fc_v = nn.Linear(hid_dim, hid_dim).to(device)
 
-        self.fc_o = nn.Linear(hid_dim, hid_dim)
+        self.fc_o = nn.Linear(hid_dim, hid_dim).to(device)
 
-        self.dropout = nn.Dropout(dropout_rate)
+        self.dropout = nn.Dropout(dropout_rate).to(device)
         # sqrt(head_dim)
         self.scale = torch.sqrt(torch.FloatTensor([self.head_dim])).to(device)
 
@@ -112,22 +122,24 @@ class MultiHeadAttentionLayer(nn.Module):
         #key = [batch size, key len, hid dim]
         #value = [batch size, value len, hid dim]
 
-        # Q = [batch size, query len, hid dim], Q = XW^{Q}
-        # K = [batch size, key len, hid dim], K = XW^{K}
-        # V = [batch size, value len, hid dim], V = XW^{V}
         Q = self.fc_q(query)
         K = self.fc_k(key)
         V = self.fc_v(value)
+        # Q = [batch size, query len, hid dim], Q = XW^{Q}
+        # K = [batch size, key len, hid dim], K = XW^{K}
+        # V = [batch size, value len, hid dim], V = XW^{V}
 
         # Split Q, K, and V into multiple heads
         # e.g. if hid_dim = 256 and n_heads = 4
         # , Q = [batch size, query len, hid dim] -> [batch size, query len, 4, 64] by view -> [batch size, 4, query len, 64] by permute(0,2,1,3)
+
+        Q = Q.view(batch_size, query.size()[1], self.n_heads, self.head_dim).permute(0, 2, 1, 3)
+        K = K.view(batch_size, key.size()[1], self.n_heads, self.head_dim).permute(0, 2, 1, 3)
+        V = V.view(batch_size, value.size()[1], self.n_heads, self.head_dim).permute(0, 2, 1, 3)
+
         # Q = [batch size, n heads, query len, head dim]
         # K = [batch size, n heads, key len, head dim]
         # V = [batch size, n heads, value len, head dim]
-        Q = Q.view(batch_size, -1, self.n_heads, self.head_dim).permute(0, 2, 1, 3)
-        K = K.view(batch_size, -1, self.n_heads, self.head_dim).permute(0, 2, 1, 3)
-        V = V.view(batch_size, -1, self.n_heads, self.head_dim).permute(0, 2, 1, 3)
 
         # non-normalized attentional weights
         # energy = [batch size, n heads, seq len, seq len]
@@ -148,7 +160,7 @@ class MultiHeadAttentionLayer(nn.Module):
         x = x.permute(0, 2, 1, 3).contiguous()
 
         # x = [batch size, seq len, hid dim]
-        x = x.view(batch_size, -1, self.hid_dim)
+        x = x.view(batch_size, x.size()[1], self.hid_dim)
 
         # Get the context vector by concatenating all heads and multiply it by W^{O}
         # x = [batch size, seq len, hid dim]
