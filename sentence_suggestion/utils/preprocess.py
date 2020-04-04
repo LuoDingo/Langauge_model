@@ -1,6 +1,6 @@
 import re
-import spacy
 import nltk
+from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 import string, re
 
@@ -13,9 +13,8 @@ KEEP = ['my','her','him','them',
         'both','all','more','few','very','now','too',
         'can','will']
 
-spacy_en = spacy.load('en_core_web_sm')
 def tokenize(sentence):
-    return [token.text for token in spacy_en.tokenizer(sentence)]
+    return word_tokenize(sentence)
 
 def _remove_char(value, target):
     question_idx = value.find(target)
