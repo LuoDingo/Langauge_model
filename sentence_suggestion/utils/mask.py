@@ -17,6 +17,7 @@ def mask_corpus(corpus, prob_mask, keep_tags, keep_words, tagger=None):
     for id, sentence in enumerate(corpus):
         _sentence = tagger(sentence.lower())
         masked_sentence = []
+        original_sentence = []
         for token in _sentence:
             if (token.text not in keep_words) and (token.pos_ not in keep_tags):
                 if _is_mask(prob_mask):
@@ -25,5 +26,6 @@ def mask_corpus(corpus, prob_mask, keep_tags, keep_words, tagger=None):
                     masked_sentence.append(token.text)
             else:
                 masked_sentence.append(token.text)
-        masked_corpus.append((masked_sentence, id))
+            original_sentence.append(token.text)
+        masked_corpus.append((id, masked_sentence, original_sentence))
     return masked_corpus
