@@ -30,16 +30,19 @@ class TrainModel():
     def train(self, clip):
         self.model.train()
         epoch_loss = 0
-        for batch in self.train_iterator:
-            keyword = batch.keyword
-            target_id = batch.label
+        for c, batch in numerate(self.train_iterator):
+            print(f'{c}-th batch ruuning')
+            keyword = batch.keywords
+            trg = batch.target
+            target_id = batch.id
             #target_id = [batch_size]
 
             self.optimizer.zero_grad()
-            pred_id = self.model(keyword)
-            #pred_id = [batch_size, output_dim]
+            # prob: probability distribution over searching space given keywords for each batch
+            prob_dist = self.model(keyword, trg)
+            #pred = [batch_size, output_dim]
 
-            loss = self.criterion(pred_id, target_id)
+            loss = self.criterion(prob_dist, target_id)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), clip)
             self.optimizer.step()
@@ -51,10 +54,12 @@ class TrainModel():
         epoch_loss = 0
         with torch.no_grad():
             for batch in self.val_iterator:
-                keyword = batch.keyword
-                target_id = batch.label
 
-                pred_id = self.model(keyword)
+                keyword = batch.keywords
+                trg = batch.target
+                target_id = batch.id
+
+                pred_id = self.model(keyword, trg)
                 #pred_id = [1, batch size]
 
                 pred_id = pred_id.squeeze()
@@ -64,7 +69,7 @@ class TrainModel():
                 epoch_loss += loss.item()
         return epoch_loss / len(self.val_iterator)
 
-    def epoch(self, n_epochs, clip, model_name='tut-model.pt'):
+    def epoch(self, n_epochs, clip, model_name='transformer-lstm-model.pt'):
         # Initialize weights
         if self.weight_initializer==None:
             self.model.apply(_default_init_weights)
