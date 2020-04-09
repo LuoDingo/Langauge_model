@@ -12,7 +12,7 @@ class Encoder(nn.Module):
                  pf_dim,
                  dropout,
                  device,
-                 max_length=50):
+                 max_length=55):
 
         super().__init__()
 
@@ -276,17 +276,12 @@ class Decoder(nn.Module):
         rnn_input = torch.cat((weighted, embedded), dim=2)
         # rnn_input = [1, batch_size, enc_hid_dim+emb_dim]
 
-
         dec_hidden = dec_hidden.unsqueeze(0)
         # dec_hidden = [1, batch_size, dec_hid_dim]
 
         output, hidden = self.rnn(rnn_input, dec_hidden)
         # output = [1, batch_size, dec_hid_dim]
         # hidden = [1, batch_size, dec_hid_dim]
-
-        # make sure output==hidden
-        assert (output==hidden).all(), \
-            'output and hidden are not indentical'
 
         embedded = embedded.squeeze(0)
         # embedded = [batch_size, emb_dim]
@@ -353,8 +348,8 @@ class Seq2Seq(nn.Module):
         # keywords = [batch size, keywords_len]
         # trg = [batch size, target length]
 
-        keywords = keywords.to(self.device)
-        trg = trg.to(self.device)
+        keywords = keywords
+        trg = trg
 
         batch_size = keywords.shape[0]
         keywords_len = keywords.shape[1]
@@ -362,13 +357,12 @@ class Seq2Seq(nn.Module):
 
         mask = self.create_mask(keywords)
         # mask = [batch size, keywords len]
-
         # encoder_outputs is all hidden states of the keyword sequence
         encoder_outputs = self.encoder(keywords, mask)
         # encoder_outputs = [batch_size, keywords_len, emb_dim (bert)]
 
         # initialize hidden state as 0
-        hidden = torch.zeros(batch_size, self.decoder.hid_dim)
+        hidden = torch.zeros(batch_size, self.decoder.hid_dim).to(self.device)
         # hidden = [batch_size, dec_hid_dim]
 
         # first input to the decoder is the <sos> tokens
@@ -380,7 +374,7 @@ class Seq2Seq(nn.Module):
             _, hidden = self.decoder(input, hidden, encoder_outputs, mask)
             # input is the next word in sentence
             input = trg[:,t]
-
+            
         output = self.fc_out(hidden)
 
         return F.softmax(output, dim=1)
