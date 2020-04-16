@@ -7,7 +7,7 @@ from itertools import combinations
 import pandas as pd
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
-import utils
+from .. import utils
 
 # Helper methods
 def _getCandidates(keywords, df, threshold):
