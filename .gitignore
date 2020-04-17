@@ -1,7 +1,8 @@
-# Packaging
+# packaging
 build/
 dist/
-.pypirc
+*.pypirc
+*.egg-info
 
 
 # pycaches
