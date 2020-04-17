@@ -1,9 +1,12 @@
 import setuptools
 
+
 with open("README.md", "r") as f:
     long_description = f.read()
 
-__version__ = "1.1.0"
+
+__version__ = "1.2.5"
+
 
 setuptools.setup(
     name='sentence-suggestion',
@@ -25,6 +28,9 @@ setuptools.setup(
         'pandas',
         'numpy',
         'nltk',
+        'torch>=1.4',
+        'torchtext>=0.5',
+        'dill>=0.3',
     ],
     python_requires='>=3.5',
 )

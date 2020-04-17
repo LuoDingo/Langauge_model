@@ -6,9 +6,12 @@ sentence_suggestion.egg-info/SOURCES.txt
 sentence_suggestion.egg-info/dependency_links.txt
 sentence_suggestion.egg-info/requires.txt
 sentence_suggestion.egg-info/top_level.txt
+sentence_suggestion/inference/__init__.py
+sentence_suggestion/inference/inference.py
+sentence_suggestion/inference/model_blueprint.py
+sentence_suggestion/inference/seq2seq_multilayer_gru_with_pad.py
 sentence_suggestion/keyword_match/__init__.py
 sentence_suggestion/keyword_match/keyword_matcher.py
 sentence_suggestion/utils/__init__.py
 sentence_suggestion/utils/data.py
-sentence_suggestion/utils/data_interaction.py
-sentence_suggestion/utils/preprocess.py
+sentence_suggestion/utils/mask.py
