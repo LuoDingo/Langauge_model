@@ -1,27 +1,23 @@
 # packaging
+*.egg-info
+.pypirc
 build/
 dist/
-*.pypirc
-*.egg-info
 
 
 # pycaches
 .sentence_suggestion/
 __pycache__/
-
 .sentence_suggestion.inference/
 __pycache__/
-
 .sentence_suggestion.keyword_match/
 __pycache__/
-
 .utils/
 __pycache__/
 
 
-# ipython file
-
-.nn_match/
+# ipython checkpoint
+.nn_models/
 .ipynb_checkpoints/
 
 
