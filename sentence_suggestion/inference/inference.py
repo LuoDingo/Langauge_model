@@ -7,12 +7,21 @@ import math
 import csv
 
 
+# The likelihood is computed as the sum of negative log probability of tokens
+# (larger is more probable).
+# Thus, longer sentences tend to have lower likelihoods as it has more negative
+# values to add. We need to offset this disadvantage by dividing the sum by
+# its length times penalty term for short sentences.
 SHORT_LENGTH_PENALTY = 1.5
 
 
 class SearchSpace():
-
-
+    """
+    This class stores the searching space (sentence candidates mapped into
+    PyTorch tensors) and a model to compute the probability of those candidates
+    given keywords. In its initialization phase, it downloads the searching
+    space and constructs the seaching space. This operation may take a while.
+    """
     def __init__(self,
                  input_vocab_path,
                  output_vocab_path,
@@ -53,6 +62,31 @@ class SearchSpace():
 
 
     def search_kbest(self, keywords, k):
+        """Searches for the sentence suggestions in the searching space
+
+        Parameters
+        ----------
+        keywords : str
+            A bunch of keywords entered by users. keywords are expected to be
+            separated by white spaces, e.g. 'what time movie'.
+        k : int
+            The number of sentences to be fetched from the sentence candidates in
+            the searching space.
+
+        Return
+        ------
+        suggestions : list of tuples
+            The most probable k number of sentences found in the search space.
+            It contains sentences with their probabilities, which are ordered
+            by probability in descending order.
+
+        Example
+        -------
+        >>> search_kbest('what time movie', 2)
+        [('and what day would you like to see it ?', 0.0664),
+         ('hi , can i get movie tickets here ?', 0.0662)]
+
+        """
         # gotta discuss the format of keywords upon integration
         # tokenize keywords and make them lower case
         if isinstance(keywords, str):

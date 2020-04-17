@@ -11,8 +11,15 @@ DROPOUT = 0.3
 
 
 class NNModel():
-
-
+    """
+    This class stores the detail of trained model stored as
+    "seq2seq-multilayer-gru.pt". Since loading the model requires to give
+    exactly the same parameters used for training, we need to store the blue
+    print of a model.
+    First, the model is initialized with exactly the same parameter values used
+    during the training, then it loads model. It also store the vocabularies
+    used during the training.
+    """
     def __init__(self,
                  input_vocab_path,
                  output_vocab_path,
