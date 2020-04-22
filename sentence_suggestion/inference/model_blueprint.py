@@ -1,5 +1,8 @@
 from .seq2seq_multilayer_gru_with_pad import Seq2Seq
+from .loader import DataLoader
+
 import dill
+
 import torch
 import torchtext
 
@@ -23,7 +26,6 @@ class NNModel():
     def __init__(self,
                  input_vocab_path,
                  output_vocab_path,
-                 model_path,
                  device_type):
         # store torchtext's field objects
         self.input_field = self._load_dill(input_vocab_path)
@@ -40,12 +42,11 @@ class NNModel():
               n_layers=N_LAYER,
               dropout=DROPOUT
         ).to(self.device)
-        self._load_model(model_path)
+        self._load_model()
         # make sure we don't update model
         self.model.eval()
         self.decoder = self.model.decoder
         self.encoder = self.model.encoder
-
 
     # torchtext's version should be >= 0.5
     def _load_dill(self, path):
@@ -53,8 +54,8 @@ class NNModel():
             obj = dill.load(f)
         return obj
 
-
-    def _load_model(self, model_path):
+    def _load_model(self):
+        loader = DataLoader()
         self.model.load_state_dict(
-            torch.load(model_path, map_location=self.device)
+            torch.load(loader.model_path, map_location=self.device)
         )

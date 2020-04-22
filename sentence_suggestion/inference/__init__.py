@@ -12,3 +12,7 @@ inference/
                                        given keywords.
 """
 from .inference import SearchSpace
+
+__all__ = [
+    "SearchSpace"
+]

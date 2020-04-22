@@ -25,13 +25,11 @@ class SearchSpace():
     def __init__(self,
                  input_vocab_path,
                  output_vocab_path,
-                 model_path,
                  device_type,
                  sentence_candidates_path):
         self.model = NNModel(
             input_vocab_path=input_vocab_path,
             output_vocab_path=output_vocab_path,
-            model_path=model_path,
             device_type=device_type
         )
         self.search_space = self._construct_search_space(

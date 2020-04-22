@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 
-__version__ = "1.2.6"
+__version__ = "1.3.0"
 
 
 setuptools.setup(
@@ -30,6 +30,7 @@ setuptools.setup(
         'torch>=1.4',
         'torchtext>=0.5',
         'dill>=0.3',
+        'tqdm>=4.31'
     ],
     python_requires='>=3.5',
 )
