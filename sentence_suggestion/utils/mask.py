@@ -1,6 +1,5 @@
 import pandas as pd
 import random
-import spacy_udpipe
 from collections import Counter
 
 PROB_MASK_NON_KEYWORDS = 0.9
@@ -31,6 +30,10 @@ class MaskCorpus():
         return list(vocab)
 
     def _default_tagger(self):
+        try:
+            import spacy_udpipe
+        except ImportError:
+            raise('You are missing pos tagger, try `pip install spacy_udpipe`')
         spacy_udpipe.download('en')
         return spacy_udpipe.load('en')
 

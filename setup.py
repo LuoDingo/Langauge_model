@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 
 setuptools.setup(
@@ -32,5 +32,5 @@ setuptools.setup(
         'dill>=0.3',
         'tqdm>=4.31'
     ],
-    python_requires='>=3.5',
+    python_requires='>=3.7',
 )
