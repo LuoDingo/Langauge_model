@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 
-__version__ = "1.3.1"
+__version__ = "1.3.3"
 
 
 setuptools.setup(
