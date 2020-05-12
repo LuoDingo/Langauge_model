@@ -11,8 +11,10 @@ inference/
                                        conditional probability of sentences
                                        given keywords.
 """
-from .inference import SearchSpace
+from .loader import DataLoader
+from .model_blueprint import NNModel
 
 __all__ = [
-    "SearchSpace"
+    "DataLoader",
+    "NNModel"
 ]

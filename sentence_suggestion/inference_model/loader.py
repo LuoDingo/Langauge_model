@@ -9,6 +9,7 @@ class DataLoader():
     This class is used to download a pre-trained neural network model from url.
     It stores model name and the link to a model.
     """
+    
     def __init__(self):
         # url where model is stored
         self.model_url = 'https://www.dropbox.com/s/exxhu5p2st4nvau/seq2seq-multilayer-gru.pt?dl=1'
