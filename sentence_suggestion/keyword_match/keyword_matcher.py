@@ -7,7 +7,7 @@ from itertools import combinations
 import pandas as pd
 from fuzzywuzzy import process
 from fuzzywuzzy import fuzz
-from .. import utils
+from ..utils.data import fetch_csv_from_url
 
 # Helper methods
 def _getCandidates(keywords, df, threshold):
@@ -77,7 +77,7 @@ class KeywordMatcher():
 
     def __init__(self, url, col_index):
         self.url = url
-        self.target_space = utils.fetch_csv_from_url(url, column_indices=col_index, column_names=['text'])
+        self.target_space = fetch_csv_from_url(url, column_indices=col_index, column_names=['text'])
 
     def selectKBestMatches(self, keywords, max_candidate, k, scoring_method):
 
@@ -89,4 +89,4 @@ class KeywordMatcher():
         return suggestions
 
     def update_target_space(self, url, col_index):
-        self.target_space = utils.fetch_csv_from_url(url, column_indices=col_index, column_names=['text'])
+        self.target_space = fetch_csv_from_url(url, column_indices=col_index, column_names=['text'])

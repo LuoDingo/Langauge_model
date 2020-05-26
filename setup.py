@@ -1,14 +1,17 @@
 import setuptools
 
+
 with open("README.md", "r") as f:
     long_description = f.read()
 
-__version__ = "1.1.0"
+
+__version__ = "1.3.3"
+
 
 setuptools.setup(
     name='sentence-suggestion',
     version=__version__,
-    author='Kei Nemoto, Steven Alshheimer (equal contribution)',
+    author='Kei Nemoto, Steven Alshheimer',
     author_email='',
     description='A package that contains sentence suggestion models',
     long_description=long_description,
@@ -24,7 +27,10 @@ setuptools.setup(
         'fuzzywuzzy',
         'pandas',
         'numpy',
-        'nltk',
+        'torch>=1.4',
+        'torchtext>=0.5',
+        'dill>=0.3',
+        'tqdm>=4.31'
     ],
-    python_requires='>=3.5',
+    python_requires='>=3.7',
 )

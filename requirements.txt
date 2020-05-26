@@ -1,9 +1,0 @@
-# used in keyword matching
-fuzzywuzzy
-
-# data structure
-pandas
-numpy
-
-# NLP operations
-nltk
