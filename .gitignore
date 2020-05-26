@@ -31,4 +31,4 @@ test/
 .inference/
 data/
 *.pt
-test.py
+
