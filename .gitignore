@@ -1,0 +1,34 @@
+# packaging
+*.egg-info
+.pypirc
+build/
+dist/
+
+
+# pycaches
+.sentence_suggestion/
+__pycache__/
+.sentence_suggestion.inference/
+__pycache__/
+.sentence_suggestion.keyword_match/
+__pycache__/
+.utils/
+__pycache__/
+
+
+# ipython checkpoint
+.nn_models/
+.ipynb_checkpoints/
+
+
+# tests
+__pycache__/
+test/
+
+
+# data
+.sentence_suggestion
+.inference/
+data/
+*.pt
+test.py
