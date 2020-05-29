@@ -109,7 +109,6 @@ class TrainModel():
         for epoch in range(n_epochs):
             start_time = time.time()
             train_loss = self.train(clip)
-            print('Evaluation')
             valid_loss = self.evaluate()
             epoch_mins, epoch_secs = _epoch_time(start_time)
             if valid_loss < best_valid_loss:
